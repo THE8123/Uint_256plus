@@ -12,6 +12,16 @@ const int MAXBITES = MAXBYTES * 8;
 class myInt {
 public:
     bool *val = (bool *) malloc(sizeof(bool) * MAXBITES);
+
+    void operator+=(const myInt &b) const{
+        int buf = 0;
+        for (int i = 0; i < MAXBITES; i++) {
+            buf += val[i] + b.val[i];
+            val[i] = (buf & 1);
+            buf >>= 1;
+        }
+    }
+
     myInt(unsigned long long a) {
         for (int i = 0; i < MAXBITES; i++) {
             val[i] = (a & 1);
@@ -46,7 +56,7 @@ unsigned long long size(const myInt &a) {
         if (a.val[i])
             return i + 1;
     }
-    return 0;
+    return 1;
 }
 
 unsigned long long toull(const myInt &a) {
@@ -125,14 +135,7 @@ myInt operator+(const myInt &a, const myInt &b) {
     return res;
 }
 
-void operator+=(const myInt &a, const myInt &b) {
-    int buf = 0;
-    for (int i = 0; i < MAXBITES; i++) {
-        buf += a.val[i] + b.val[i];
-        a.val[i] = (buf & 1);
-        buf >>= 1;
-    }
-}
+
 
 myInt operator-(const myInt &a, const myInt &b) {
     myInt res;
@@ -155,7 +158,7 @@ myInt operator/(const myInt &a, const myInt &b) {
     myInt res, d = a;
     if (a < b)
         return 0;
-    for (unsigned long long i = size(a) - size(b) + 1;; i--) {
+    for (unsigned long long i = MAXBITES - size(b);; i--) {
         if (d >= (b << i)) {
             res.val[i] = true;
             d = d - (b << i);
@@ -170,20 +173,40 @@ myInt operator%(const myInt &a, const myInt &b) {
     return a - (a / b) * b;
 }
 
+myInt stomi(const string &s) {
+    myInt tmp;
+    for (char q : s) {
+        tmp = tmp * 10 + (q - '0');
+    }
+    return tmp;
+}
+
 ostream &operator<<(ostream &out, const myInt &a) {
+
+    if (a >= 10) {
+        out << a / 10;
+    }
+    return out << toull(a % 10);
+
     unsigned long long res = toull(a);
-    return out << res;
-    /*
-  for (int i = MAXBITES - 1; i >= 0; i--) {
-      out << a.val[i];
-  }
-  return out; */
+    return out << res << " ";
+
+    for (int i = MAXBITES - 1; i >= 0; i--) {
+        out << a.val[i];
+    }
+    return out;
+
 }
 
 istream &operator>>(istream &in, myInt &a) {
-    unsigned long long x;
-    in >> x;
-    a = x;
+    unsigned long long res;
+    in >> res;
+    a = res;
+    return in;
+
+    string s;
+    in >> s;
+    a = stomi(s);
     return in;
 }
 
@@ -195,7 +218,6 @@ void print(const myInt &a) {
 }
 
 int main() {
-    myInt a = 10;
-    myInt b = 5;
-    cout << a + b << "\n" << a - 3 << "\n" << a * b * 4 << "\n" << a / 3;
+
+
 }
