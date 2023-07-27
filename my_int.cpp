@@ -5,22 +5,13 @@
 
 using namespace std;
 
-const int MAXBYTES = 32;
+const int MAXBYTES = 2;
 const int MAXBITES = MAXBYTES * 8;
 
 
 class myInt {
 public:
-    bool *val = (bool *) malloc(sizeof(bool) * MAXBITES);
-
-    void operator+=(const myInt &b) const{
-        int buf = 0;
-        for (int i = 0; i < MAXBITES; i++) {
-            buf += val[i] + b.val[i];
-            val[i] = (buf & 1);
-            buf >>= 1;
-        }
-    }
+    bitset<MAXBITES> val;
 
     myInt(unsigned long long a) {
         for (int i = 0; i < MAXBITES; i++) {
@@ -41,6 +32,31 @@ public:
         }
     }
 
+    void operator+=(const myInt &b) {
+        int buf = 0;
+        for (int i = 0; i < MAXBITES; i++) {
+            buf += val[i] + b.val[i];
+            val[i] = (buf & 1);
+            buf >>= 1;
+        }
+    }
+
+    void operator<<=(const unsigned long long &b) {
+        if (b == 0)
+            return;
+
+        for (unsigned long long i = MAXBITES - 1; i >= b; i--) {
+            val[i] = val[i - b];
+            val[i - b] = false;
+        }
+    }
+
+    void operator>>=(const unsigned long long &b) {
+        for (unsigned long long i = 0; i < MAXBITES - b; i++) {
+            val[i] = val[i + b];
+            val[i + b] = false;
+        }
+    }
 };
 
 myInt rev(const myInt &a) {
@@ -136,11 +152,10 @@ myInt operator+(const myInt &a, const myInt &b) {
 }
 
 
-
 myInt operator-(const myInt &a, const myInt &b) {
     myInt res;
-    res += (a + 1);
-    res += rev(b);
+    res = res + (a + 1);
+    res = res + rev(b);
     return res;
 }
 
@@ -149,7 +164,7 @@ myInt operator*(const myInt &a, const myInt &b) {
     for (unsigned long long i = 0; i < MAXBITES; i++) {
         if (!b.val[i])
             continue;
-        res += (a << i);
+        res = res + (a << i);
     }
     return res;
 }
@@ -175,7 +190,7 @@ myInt operator%(const myInt &a, const myInt &b) {
 
 myInt stomi(const string &s) {
     myInt tmp;
-    for (char q : s) {
+    for (char q: s) {
         tmp = tmp * 10 + (q - '0');
     }
     return tmp;
@@ -218,6 +233,5 @@ void print(const myInt &a) {
 }
 
 int main() {
-
-
+    
 }
