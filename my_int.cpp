@@ -5,9 +5,26 @@
 
 using namespace std;
 
-const int MAXBYTES = 2;
+const int MAXBYTES = 32;
 const int MAXBITES = MAXBYTES * 8;
 
+template<typename T>
+T rev(const T &a) {
+    T res;
+    for (int i = 0; i < MAXBITES; i++) {
+        res.val[i] = !a.val[i];
+    }
+    return res;
+}
+
+template<typename T>
+unsigned long long size(const T &a) {
+    for (int i = MAXBITES - 1; i >= 0; i--) {
+        if (a.val[i])
+            return i + 1;
+    }
+    return 1;
+}
 
 class myInt {
 public:
@@ -32,15 +49,6 @@ public:
         }
     }
 
-    void operator+=(const myInt &b) {
-        int buf = 0;
-        for (int i = 0; i < MAXBITES; i++) {
-            buf += val[i] + b.val[i];
-            val[i] = (buf & 1);
-            buf >>= 1;
-        }
-    }
-
     void operator<<=(const unsigned long long &b) {
         if (b == 0)
             return;
@@ -57,23 +65,33 @@ public:
             val[i + b] = false;
         }
     }
+
+    void operator+=(const myInt &b) {
+        int buf = 0;
+        for (int i = 0; i < MAXBITES; i++) {
+            buf += val[i] + b.val[i];
+            val[i] = (buf & 1);
+            buf >>= 1;
+        }
+    }
+
+    void operator-=(const myInt &b) {
+        *this += 1;
+        *this += rev(b);
+    }
+
+    void operator*=(const myInt &b) {
+        myInt tmp = *this;
+        *this = 0;
+        for (unsigned long long i = 0; i < MAXBITES; i++) {
+            if (!b.val[i])
+                continue;
+            *this += tmp;
+            tmp <<= 1;
+        }
+    }
 };
 
-myInt rev(const myInt &a) {
-    myInt res;
-    for (int i = 0; i < MAXBITES; i++) {
-        res.val[i] = !a.val[i];
-    }
-    return res;
-}
-
-unsigned long long size(const myInt &a) {
-    for (int i = MAXBITES - 1; i >= 0; i--) {
-        if (a.val[i])
-            return i + 1;
-    }
-    return 1;
-}
 
 unsigned long long toull(const myInt &a) {
     unsigned long long res = 0;
@@ -214,14 +232,14 @@ ostream &operator<<(ostream &out, const myInt &a) {
 }
 
 istream &operator>>(istream &in, myInt &a) {
-    unsigned long long res;
-    in >> res;
-    a = res;
-    return in;
-
     string s;
     in >> s;
     a = stomi(s);
+    return in;
+
+    unsigned long long res;
+    in >> res;
+    a = res;
     return in;
 }
 
@@ -230,8 +248,4 @@ void print(const myInt &a) {
         print(a / 10);
     }
     cout << toull(a % 10);
-}
-
-int main() {
-    
 }
